@@ -1,6 +1,10 @@
 
 const {Builder, By, Key, until} = require('selenium-webdriver');
 let chrome = require('selenium-webdriver/chrome');
+let dataList = require('./data');
+const fs = require('fs');
+
+let filename = 'rslt.csv';
 
 (async function example() {
   let driver = await new Builder().forBrowser('firefox').build();
@@ -12,34 +16,53 @@ let chrome = require('selenium-webdriver/chrome');
   	await driver.findElement(By.id('loginBtn')).click();
   	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 5000);
 
-	await driver.findElement(By.name('q')).sendKeys('澳柯玛股份有限公司', Key.RETURN);
+		await driver.findElement(By.name('q')).sendKeys('澳柯玛股份有限公司', Key.RETURN);
 
-	async function dealList() {
-		await driver.sleep(5000);
-	    let divs = await driver.findElements(By.className('u-list-div'));
-	    for (var i = divs.length - 1; i >= 0; i--) {
-	    	let txt = await divs[i].getText();
-	    	console.log('txt:',txt)
-	    }
-	}
+		async function dealList() {
+			await driver.sleep(5000);
+				let divs = await driver.findElements(By.className('u-list-div'));
+				for (let i = 0; i < divs.length; i++) {
+					let cols = await divs[i].findElements(By.css('.Js_hl div p'));
+					let valStr = '\n';
+					for (let j = 0; j < cols.length; j++) {
+						let colTit;
+						let colTitDom = await cols[j].findElements(By.css('strong'));
+						if (colTitDom.length) colTit = await colTitDom[0].getText();
+						let colVals = await cols[j].getText();
+						colVals = colVals.split(colTit)[1];
+						console.log('txt:', colTit, colVals)
+						valStr += colVals+','
+					}
+					await fs.appendFileSync(filename, valStr)
+				}
+		}
 
-    await dealList();
+		async function crawlerAll() {
+			await dealList();
+			let flag = true;
+			while (flag) {
+				let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
+				flag = fd.length == 0;
+				let dloadDom = await driver.findElements(By.css('.list-l-download'));
+				if (dloadDom.length) {
+					await driver.executeScript("document.getElementsByClassName('list-l-download')[0].style.display = 'none';")
+				}
+				await driver.findElement(By.css('.paging-next')).click();
 
-    let flag = true;
-    while (flag) {
-   		let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
-   		flag = fd.length == 0;
-   		await driver.findElement(By.css('.paging-next')).click();
+				await dealList();
+			}
+		}
+		await crawlerAll();
 
-   		await dealList();
-    }
-    
-    while(true) {
-
-	}
+    for (let i = 1; i < dataList.length; i++) {
+			await driver.findElement(By.name('q')).sendKeys(dataList[i].name, Key.RETURN);
+			await crawlerAll();
+		}
+		
+    while(true) {}
   } catch(err) {
   	console.log(err);
   } finally {
-    await driver.quit();
+    // await driver.quit();
   }
 })();
