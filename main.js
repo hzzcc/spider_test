@@ -22,8 +22,11 @@ function processSync(img) {
 								console.log('read file error:', err);
 								reject(err);
 							}else {
-								data = data.replace('\n','').replace('>','7');
-								resolve(data);
+								let str = data.toString();
+                console.log(str);								
+                str = str.replace(/\n/g,'').replace(/>/g,'7').replace(/-/g,'L').replace('<','L');
+                console.log(str);
+								resolve(str);
 							}
 						})
 				}
