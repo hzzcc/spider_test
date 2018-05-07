@@ -17,7 +17,6 @@ exec('python ImageRecognize/tess_test.py '+img, function(err, stdout, stderr) {
             }else {
                 let str = data.toString();
                 console.log(str);
-                str = 'jks>'
                 str = str.replace(/\n/g,'').replace(/>/g,'7').replace(/-/g,'L').replace('<','L');
                 console.log(str);
             }

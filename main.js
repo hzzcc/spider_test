@@ -20,7 +20,8 @@ function processSync(img) {
 						fs.readFile('temp.txt', (err, data) => {
 							if (err) {
 								console.log('read file error:', err);
-								reject(err);
+								// reject(err);
+								resolve("emrw")
 							}else {
 								let str = data.toString();
                 console.log(str);								
@@ -42,7 +43,7 @@ function processSync(img) {
   	await driver.findElement(By.name('password')).sendKeys('huang2601793');
   	await driver.sleep(1000);
   	await driver.findElement(By.id('loginBtn')).click();
-  	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 5000);
+  	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
 
 		await driver.findElement(By.name('q')).sendKeys('澳柯玛股份有限公司', Key.RETURN);
 
@@ -84,7 +85,7 @@ function processSync(img) {
 								src = await nocrawler[0].getAttribute('src');
 								base64Data = src.replace(/^data:image\/\w+;base64,/, "")
 								dataBuffer = new Buffer(base64Data, 'base64');
-								await fs.writeFileSync("image.png", dataBuffer);
+								await fs.writeFileSync(imageFile, dataBuffer);
 								txt = await processSync(path.join(__dirname,imageFile));
 								console.log(JSON.stringify(txt));
 								await driver.sleep(Math.random() * 1000);
