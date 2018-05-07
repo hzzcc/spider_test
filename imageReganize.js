@@ -1,5 +1,4 @@
 const path = require('path');
-var tesseract = require('node-tesseract');
 var exec = require('child_process').exec; 
 var fs = require('fs');
 
