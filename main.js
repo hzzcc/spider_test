@@ -3,15 +3,40 @@ const {Builder, By, Key, until} = require('selenium-webdriver');
 let chrome = require('selenium-webdriver/chrome');
 let dataList = require('./data');
 const fs = require('fs');
+const path = require('path');
+var exec = require('child_process').exec;
 
 let filename = 'rslt.csv';
+let imageFile = './ImageRecognize/pic/get_random_image.png';
+
+function processSync(img) {
+	return new Promise((resolve, reject) => {
+		exec('python ImageRecognize/tess_test.py '+img, function(err, stdout, stderr) {
+				if(err) {
+						console.log('image recognize error:', err);
+						reject(err);
+				}else {
+						console.log(stdout);
+						fs.readFile('temp.txt', (err, data) => {
+							if (err) {
+								console.log('read file error:', err);
+								reject(err);
+							}else {
+								data = data.replace('\n','').replace('>','7');
+								resolve(data);
+							}
+						})
+				}
+		})
+	})
+}
 
 (async function example() {
   let driver = await new Builder().forBrowser('firefox').build();
   try {
   	await driver.get('https://login.zlbaba.com/login?service=http://www.patexplorer.com/login/cas');
-  	await driver.findElement(By.name('username')).sendKeys('');
-  	await driver.findElement(By.name('password')).sendKeys('');
+  	await driver.findElement(By.name('username')).sendKeys('18516551675');
+  	await driver.findElement(By.name('password')).sendKeys('huang2601793');
   	await driver.sleep(1000);
   	await driver.findElement(By.id('loginBtn')).click();
   	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 5000);
@@ -19,7 +44,64 @@ let filename = 'rslt.csv';
 		await driver.findElement(By.name('q')).sendKeys('澳柯玛股份有限公司', Key.RETURN);
 
 		async function dealList() {
-				await driver.wait(until.elementLocated(By.css('.paging-next')), 20000);
+				console.log('####dealList start');
+				
+				let nocrawler;
+				try {
+					await driver.wait(until.elementLocated(By.id('nocrawler_img')), 5000);
+					nocrawler = await driver.findElements(By.id('nocrawler_img'));
+				}catch (err){
+				}
+				if (nocrawler && nocrawler.length) {
+					await driver.sleep(1000);
+					let src = await nocrawler[0].getAttribute('src');
+					var base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+					var dataBuffer = new Buffer(base64Data, 'base64');
+					await fs.writeFileSync(imageFile, dataBuffer);
+					let txt = await processSync(path.join(__dirname,imageFile));
+					console.log(JSON.stringify(txt));
+					await driver.sleep(Math.random() * 1000);
+					await driver.findElement(By.id('code')).sendKeys(txt);
+					await driver.findElement(By.id('Button1')).click();
+					await driver.sleep(2000);
+					let ok = false;
+					try {
+						await driver.wait(until.alertIsPresent(), 2000);
+					}catch (err) {
+						ok = true;
+					}
+					if (!ok){
+						let alertDom = await driver.switchTo().alert();
+						while (alertDom) {
+							await alertDom.accept();
+							await driver.wait(until.elementLocated(By.id('nocrawler_img')), 3000);
+							nocrawler = await driver.findElements(By.id('nocrawler_img'));
+							if (nocrawler.length) {
+								await driver.sleep(1000);
+								src = await nocrawler[0].getAttribute('src');
+								base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+								dataBuffer = new Buffer(base64Data, 'base64');
+								await fs.writeFileSync("image.png", dataBuffer);
+								txt = await processSync(path.join(__dirname,imageFile));
+								console.log(JSON.stringify(txt));
+								await driver.sleep(Math.random() * 1000);
+								await driver.findElement(By.id('code')).sendKeys(txt);
+								await driver.findElement(By.id('Button1')).click();
+								let ok = false;
+								try {
+									await driver.wait(until.alertIsPresent(), 2000);
+									alertDom = await driver.switchTo().alert();
+								}catch (err) {
+									ok = true;
+									alertDom = null;
+								}
+							}
+						}
+					}
+				}
+				
+				
+				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 				await driver.sleep(Math.random() * 2000 + 2000)				
 				let divs = await driver.findElements(By.className('u-list-div'));
 				for (let i = 0; i < divs.length; i++) {
@@ -36,6 +118,8 @@ let filename = 'rslt.csv';
 					}
 					await fs.appendFileSync(filename, valStr)
 				}
+
+				console.log('####dealList end');
 		}
 
 		async function crawlerAll() {
