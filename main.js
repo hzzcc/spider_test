@@ -14,7 +14,7 @@ function processSync(img) {
 		exec('python ImageRecognize/tess_test.py '+img, function(err, stdout, stderr) {
 				if(err) {
 						console.log('image recognize error:', err);
-						reject(err);
+						resolve("emrw")
 				}else {
 						console.log(stdout);
 						fs.readFile('temp.txt', (err, data) => {
@@ -65,6 +65,7 @@ function processSync(img) {
 					let txt = await processSync(path.join(__dirname,imageFile));
 					console.log(JSON.stringify(txt));
 					await driver.sleep(Math.random() * 1000);
+					await driver.findElement(By.id('code')).clear();
 					await driver.findElement(By.id('code')).sendKeys(txt);
 					await driver.findElement(By.id('Button1')).click();
 					await driver.sleep(2000);
@@ -89,6 +90,7 @@ function processSync(img) {
 								txt = await processSync(path.join(__dirname,imageFile));
 								console.log(JSON.stringify(txt));
 								await driver.sleep(Math.random() * 1000);
+								await driver.findElement(By.id('code')).clear();
 								await driver.findElement(By.id('code')).sendKeys(txt);
 								await driver.findElement(By.id('Button1')).click();
 								let ok = false;
