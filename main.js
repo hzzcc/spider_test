@@ -39,6 +39,73 @@ function processSync(img) {
 
 (async function example() {
   let driver = await new Builder().forBrowser('chrome').build();
+  
+  async function dealyzm() {
+	console.log('deal yanzhengma');
+	try {
+	  let nocrawler;
+	  try {
+	  	await driver.wait(until.elementLocated(By.id('nocrawler_img')), 5000);
+	  	nocrawler = await driver.findElements(By.id('nocrawler_img'));
+	  	flag = true;
+	  } catch (err) {
+	  	flag = false;
+	  }
+	  if (nocrawler && nocrawler.length) {
+	  	await driver.sleep(1000);
+	  	let src = await nocrawler[0].getAttribute('src');
+	  	var base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+	  	var dataBuffer = new Buffer(base64Data, 'base64');
+	  	await fs.writeFileSync(imageFile, dataBuffer);
+	  	let txt = await processSync(path.join(__dirname, imageFile));
+	  	console.log(JSON.stringify(txt));
+	  	await driver.sleep(Math.random() * 1000);
+	  	await driver.findElement(By.id('code')).clear();
+	  	await driver.findElement(By.id('code')).sendKeys(txt);
+	  	await driver.findElement(By.id('Button1')).click();
+	  	await driver.sleep(2000);
+	  	let ok = false;
+	  	try {
+	  		await driver.wait(until.alertIsPresent(), 2000);
+	  	} catch (err) {
+	  		ok = true;
+	  	}
+	  	if (!ok) {
+	  		let alertDom = await driver.switchTo().alert();
+	  		while (alertDom) {
+	  			await alertDom.accept();
+	  			await driver.wait(until.elementLocated(By.id('nocrawler_img')), 3000);
+	  			nocrawler = await driver.findElements(By.id('nocrawler_img'));
+	  			if (nocrawler.length) {
+	  				await driver.sleep(1000);
+	  				src = await nocrawler[0].getAttribute('src');
+	  				base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+	  				dataBuffer = new Buffer(base64Data, 'base64');
+	  				await fs.writeFileSync(imageFile, dataBuffer);
+	  				txt = await processSync(path.join(__dirname, imageFile));
+	  				console.log(JSON.stringify(txt));
+	  				await driver.sleep(Math.random() * 1000);
+	  				await driver.findElement(By.id('code')).clear();
+	  				await driver.findElement(By.id('code')).sendKeys(txt);
+	  				await driver.findElement(By.id('Button1')).click();
+	  				let ok = false;
+	  				try {
+	  					await driver.wait(until.alertIsPresent(), 2000);
+	  					alertDom = await driver.switchTo().alert();
+	  				} catch (err) {
+	  					ok = true;
+	  					alertDom = null;
+	  				}
+	  			}
+	  		}
+	  	}
+	  }
+	}catch(err) {
+		console.log(err);
+		await dealyzm();
+	}
+  }
+
   try {
   	await driver.get('https://login.zlbaba.com/login?service=http://www.patexplorer.com/login/cas');
   	await driver.findElement(By.name('username')).sendKeys('18516551675');
@@ -46,73 +113,15 @@ function processSync(img) {
   	await driver.sleep(1000);
   	await driver.findElement(By.id('loginBtn')).click();
 	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
-	  
+
 	async function dealList(index) {
 			console.log('####dealList start');
-			
 			let flag = true;
 			try{
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 			}catch(err) {
 				flag = false;
-
-				let nocrawler;
-				try {
-					await driver.wait(until.elementLocated(By.id('nocrawler_img')), 5000);
-					nocrawler = await driver.findElements(By.id('nocrawler_img'));
-					flag = true;
-				} catch (err) {
-					flag = false;
-				}
-				if (nocrawler && nocrawler.length) {
-					await driver.sleep(1000);
-					let src = await nocrawler[0].getAttribute('src');
-					var base64Data = src.replace(/^data:image\/\w+;base64,/, "")
-					var dataBuffer = new Buffer(base64Data, 'base64');
-					await fs.writeFileSync(imageFile, dataBuffer);
-					let txt = await processSync(path.join(__dirname, imageFile));
-					console.log(JSON.stringify(txt));
-					await driver.sleep(Math.random() * 1000);
-					await driver.findElement(By.id('code')).clear();
-					await driver.findElement(By.id('code')).sendKeys(txt);
-					await driver.findElement(By.id('Button1')).click();
-					await driver.sleep(2000);
-					let ok = false;
-					try {
-						await driver.wait(until.alertIsPresent(), 2000);
-					} catch (err) {
-						ok = true;
-					}
-					if (!ok) {
-						let alertDom = await driver.switchTo().alert();
-						while (alertDom) {
-							await alertDom.accept();
-							await driver.wait(until.elementLocated(By.id('nocrawler_img')), 3000);
-							nocrawler = await driver.findElements(By.id('nocrawler_img'));
-							if (nocrawler.length) {
-								await driver.sleep(1000);
-								src = await nocrawler[0].getAttribute('src');
-								base64Data = src.replace(/^data:image\/\w+;base64,/, "")
-								dataBuffer = new Buffer(base64Data, 'base64');
-								await fs.writeFileSync(imageFile, dataBuffer);
-								txt = await processSync(path.join(__dirname, imageFile));
-								console.log(JSON.stringify(txt));
-								await driver.sleep(Math.random() * 1000);
-								await driver.findElement(By.id('code')).clear();
-								await driver.findElement(By.id('code')).sendKeys(txt);
-								await driver.findElement(By.id('Button1')).click();
-								let ok = false;
-								try {
-									await driver.wait(until.alertIsPresent(), 2000);
-									alertDom = await driver.switchTo().alert();
-								} catch (err) {
-									ok = true;
-									alertDom = null;
-								}
-							}
-						}
-					}
-				}
+				await dealyzm();
 			}
 			await driver.sleep(Math.random() * 1000 + 500)				
 			let divs = await driver.findElements(By.className('u-list-div'));
@@ -125,12 +134,12 @@ function processSync(img) {
 					if (colTitDom.length) colTit = await colTitDom[0].getText();
 					let colVals = await cols[j].getText();
 					colVals = colVals.split(colTit)[1];
-					console.log('txt:', colTit, colVals)
+					// console.log('txt:', colTit, colVals)
 					valStr += colVals+','
 				}
 				await fs.appendFileSync(filename + index + '.csv', valStr)
 			}
-			console.log('####dealList end');
+			console.log('####dealList end '+index);
 			return flag;
 	}
 
