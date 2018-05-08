@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=46;
+let current_index=50;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -167,7 +167,8 @@ function processSync(img) {
 				}catch(err) {}
 			}
 			console.log('crawlerList...4');
-			await driver.findElement(By.css('.paging-next')).click();
+			await driver.sleep(500);
+			await driver.executeScript("document.getElementsByClassName('paging-next')[0].click()");
 			await driver.sleep(500);
 			flag = await dealList(index);
 		}
