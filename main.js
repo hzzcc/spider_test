@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=40;
+let current_index=46;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -45,7 +45,7 @@ function processSync(img) {
 	try {
 	  let nocrawler, flag;
 	  try {
-	  	await driver.wait(until.elementLocated(By.id('nocrawler_img')), 5000);
+	  	await driver.wait(until.elementLocated(By.id('nocrawler_img')), 10000);
 	  	nocrawler = await driver.findElements(By.id('nocrawler_img'));
 	  	flag = true;
 	  } catch (err) {
@@ -73,7 +73,8 @@ function processSync(img) {
 	  	if (!ok) {
 	  		let alertDom = await driver.switchTo().alert();
 	  		while (alertDom) {
-	  			await alertDom.accept();
+				  await alertDom.accept();
+				  await driver.sleep(1000);
 	  			await driver.wait(until.elementLocated(By.id('nocrawler_img')), 3000);
 	  			nocrawler = await driver.findElements(By.id('nocrawler_img'));
 	  			if (nocrawler.length) {
@@ -123,7 +124,7 @@ function processSync(img) {
 			}catch(err) {
 				flag = await dealyzm();
 			}
-			await driver.sleep(Math.random() * 1000 + 500)				
+			await driver.sleep(Math.random() * 1000 + 1000)				
 			let divs = await driver.findElements(By.className('u-list-div'));
 			for (let i = 0; i < divs.length; i++) {
 				let cols = await divs[i].findElements(By.css('.Js_hl div p'));
@@ -146,21 +147,28 @@ function processSync(img) {
 	async function crawlerAll(index) {
 		let flag = await dealList(index);
 		while (flag) {
+			console.log('crawlerList...');
 			try{
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 			}catch(err) {
 				flag = false;
 				return;
 			}
+			console.log('crawlerList...1');
 			let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
 			flag = fd.length == 0;
 			if (!flag) return;
+			console.log('crawlerList...2');
 			let dloadDom = await driver.findElements(By.css('.list-l-download'));
+			console.log('crawlerList...3');
 			if (dloadDom.length) {
-				await driver.executeScript("document.getElementsByClassName('list-l-download')[0].style.display = 'none';")
+				try{
+					await driver.executeScript("document.getElementsByClassName('list-l-download')[0].style.display = 'none';")
+				}catch(err) {}
 			}
+			console.log('crawlerList...4');
 			await driver.findElement(By.css('.paging-next')).click();
-
+			await driver.sleep(500);
 			flag = await dealList(index);
 		}
 	}
