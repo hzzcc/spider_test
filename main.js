@@ -9,6 +9,8 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
+let current_index=2;
+
 function processSync(img) {
 	return new Promise((resolve, reject) => {
 		exec('python ImageRecognize/tess_test.py '+img, function(err, stdout, stderr) {
@@ -109,7 +111,6 @@ function processSync(img) {
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 			}catch(err) {
 				flag = false;
-				return flag;
 			}
 			await driver.sleep(Math.random() * 2000 + 2000)				
 			let divs = await driver.findElements(By.className('u-list-div'));
@@ -134,6 +135,12 @@ function processSync(img) {
 	async function crawlerAll(index) {
 		let flag = await dealList(index);
 		while (flag) {
+			try{
+				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
+			}catch(err) {
+				flag = false;
+				return;
+			}
 			let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
 			flag = fd.length == 0;
 			let dloadDom = await driver.findElements(By.css('.list-l-download'));
@@ -147,13 +154,14 @@ function processSync(img) {
 	}
 	// await crawlerAll();
 
-    for (let i = 0; i < dataList.length; i++) {
+    for (let i = current_index; i < dataList.length; i++) {
 		try {
 			await driver.wait(until.elementLocated(By.name('q')), 5000);
 			await driver.findElement(By.name('q')).clear();
 			await driver.findElement(By.name('q')).sendKeys(dataList[i].name, Key.RETURN);
 		}catch (err) {
-			let bySearch = By.css('.m-search .u-search');
+			await driver.sleep(1000);
+			let bySearch = By.css('.serchform .u-search');
 			await driver.wait(until.elementLocated(bySearch), 5000);
 			await driver.findElement(bySearch).clear();
 			await driver.findElement(bySearch).sendKeys(dataList[i].name, Key.RETURN);
