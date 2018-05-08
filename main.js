@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 var exec = require('child_process').exec;
 
-let filename = 'rslt2.csv';
+let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
 function processSync(img) {
@@ -24,9 +24,9 @@ function processSync(img) {
 								resolve("emrw")
 							}else {
 								let str = data.toString();
-                console.log(str);								
-                str = str.replace(/\n/g,'').replace(/>/g,'7').replace(/-/g,'L').replace('<','L');
-                console.log(str);
+								console.log(str);								
+								str = str.replace(/\n/g,'').replace(/>/g,'7').replace(/-/g,'L').replace('<','L');
+								console.log(str);
 								resolve(str);
 							}
 						})
@@ -45,7 +45,7 @@ function processSync(img) {
   	await driver.findElement(By.id('loginBtn')).click();
 	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
 	  
-	async function dealList() {
+	async function dealList(index) {
 			console.log('####dealList start');
 			
 			let nocrawler;
@@ -125,14 +125,14 @@ function processSync(img) {
 					console.log('txt:', colTit, colVals)
 					valStr += colVals+','
 				}
-				await fs.appendFileSync(filename, valStr)
+				await fs.appendFileSync(filename + index + '.csv', valStr)
 			}
 			console.log('####dealList end');
 			return flag;
 	}
 
-	async function crawlerAll() {
-		let flag = await dealList();
+	async function crawlerAll(index) {
+		let flag = await dealList(index);
 		while (flag) {
 			let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
 			flag = fd.length == 0;
@@ -142,16 +142,23 @@ function processSync(img) {
 			}
 			await driver.findElement(By.css('.paging-next')).click();
 
-			await dealList();
+			await dealList(index);
 		}
 	}
-	await crawlerAll();
+	// await crawlerAll();
 
     for (let i = 0; i < dataList.length; i++) {
-		await driver.wait(until.elementLocated(By.name('q')), 5000);
-		await driver.findElement(By.name('q')).clear();
-		await driver.findElement(By.name('q')).sendKeys(dataList[i].name, Key.RETURN);
-		await crawlerAll();
+		try {
+			await driver.wait(until.elementLocated(By.name('q')), 5000);
+			await driver.findElement(By.name('q')).clear();
+			await driver.findElement(By.name('q')).sendKeys(dataList[i].name, Key.RETURN);
+		}catch (err) {
+			let bySearch = By.css('.m-search .u-search');
+			await driver.wait(until.elementLocated(bySearch), 5000);
+			await driver.findElement(bySearch).clear();
+			await driver.findElement(bySearch).sendKeys(dataList[i].name, Key.RETURN);
+		}
+		await crawlerAll(i);
 	}
 		
     while(true) {}
