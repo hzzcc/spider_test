@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=2;
+let current_index=7;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -143,13 +143,14 @@ function processSync(img) {
 			}
 			let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
 			flag = fd.length == 0;
+			if (!flag) return;
 			let dloadDom = await driver.findElements(By.css('.list-l-download'));
 			if (dloadDom.length) {
 				await driver.executeScript("document.getElementsByClassName('list-l-download')[0].style.display = 'none';")
 			}
 			await driver.findElement(By.css('.paging-next')).click();
 
-			await dealList(index);
+			flag = await dealList(index);
 		}
 	}
 	// await crawlerAll();
@@ -161,10 +162,14 @@ function processSync(img) {
 			await driver.findElement(By.name('q')).sendKeys(dataList[i].name, Key.RETURN);
 		}catch (err) {
 			await driver.sleep(1000);
+			await driver.executeScript("document.getElementsByClassName('Js_hideSearch')[0].remove();");
 			let bySearch = By.css('.serchform .u-search');
 			await driver.wait(until.elementLocated(bySearch), 5000);
 			await driver.findElement(bySearch).clear();
-			await driver.findElement(bySearch).sendKeys(dataList[i].name, Key.RETURN);
+			await driver.findElement(bySearch).sendKeys(dataList[i].name);
+			let s = await driver.findElement(By.css('.search-btn')).getAttribute('title');
+			await driver.findElement(By.css('.search-btn')).click();
+			console.log('.search-btn: ', s);
 		}
 		await crawlerAll(i);
 	}
