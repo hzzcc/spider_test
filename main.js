@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=7;
+let current_index=19;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ function processSync(img) {
 }
 
 (async function example() {
-  let driver = await new Builder().forBrowser('firefox').build();
+  let driver = await new Builder().forBrowser('chrome').build();
   try {
   	await driver.get('https://login.zlbaba.com/login?service=http://www.patexplorer.com/login/cas');
   	await driver.findElement(By.name('username')).sendKeys('18516551675');
