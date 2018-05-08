@@ -43,7 +43,7 @@ function processSync(img) {
   async function dealyzm() {
 	console.log('deal yanzhengma');
 	try {
-	  let nocrawler;
+	  let nocrawler, flag;
 	  try {
 	  	await driver.wait(until.elementLocated(By.id('nocrawler_img')), 5000);
 	  	nocrawler = await driver.findElements(By.id('nocrawler_img'));
@@ -100,9 +100,10 @@ function processSync(img) {
 	  		}
 	  	}
 	  }
+	  return flag;
 	}catch(err) {
 		console.log(err);
-		await dealyzm();
+		return await dealyzm();
 	}
   }
 
@@ -120,8 +121,7 @@ function processSync(img) {
 			try{
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 			}catch(err) {
-				flag = false;
-				await dealyzm();
+				flag = await dealyzm();
 			}
 			await driver.sleep(Math.random() * 1000 + 500)				
 			let divs = await driver.findElements(By.className('u-list-div'));
