@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=50;
+let current_index=1667;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -110,32 +110,54 @@ function processSync(img) {
 
   try {
   	await driver.get('https://login.zlbaba.com/login?service=http://www.patexplorer.com/login/cas');
-  	await driver.findElement(By.name('username')).sendKeys('18516551675');
-  	await driver.findElement(By.name('password')).sendKeys('huang2601793');
+  	await driver.findElement(By.name('username')).sendKeys('');
+  	await driver.findElement(By.name('password')).sendKeys('');
   	await driver.sleep(1000);
   	await driver.findElement(By.id('loginBtn')).click();
 	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
 
-	async function dealList(index) {
-			console.log('####dealList start');
+	async function dealList(index, page) {
+			console.log('####dealList start page: ', page);
 			let flag = true;
 			try{
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 			}catch(err) {
 				flag = await dealyzm();
 			}
-			await driver.sleep(Math.random() * 1000 + 1000)				
+			await driver.sleep(Math.random() * 500 + 500)				
 			let divs = await driver.findElements(By.className('u-list-div'));
+			await driver.sleep(Math.random() * 500 + 500)
 			for (let i = 0; i < divs.length; i++) {
-				let cols = await divs[i].findElements(By.css('.Js_hl div p'));
+				let cols;
+				try{
+					cols = await divs[i].findElements(By.css('.Js_hl div p'));
+				}catch(err) {
+					await driver.sleep(500);
+					cols = await divs[i].findElements(By.css('.Js_hl div p'));
+				}
+				console.log('###get item vals');
 				let valStr = '\n';
 				for (let j = 0; j < cols.length; j++) {
 					let colTit;
 					let colTitDom = await cols[j].findElements(By.css('strong'));
-					if (colTitDom.length) colTit = await colTitDom[0].getText();
-					let colVals = await cols[j].getText();
+					console.log('###get col title');
+					if (colTitDom.length) {
+						try {
+							colTit = await colTitDom[0].getText();
+						}catch(err) {
+							await driver.sleep(500);
+							colVals= await cols[j].getText();
+						}
+					}
+					let colVals;
+					try { 
+						colVals= await cols[j].getText();
+					}catch(err) {
+						await driver.sleep(500);
+						colVals= await cols[j].getText();
+					}
 					colVals = colVals.split(colTit)[1];
-					// console.log('txt:', colTit, colVals)
+					console.log('txt:', page, i, j, colTit, colVals)
 					valStr += colVals+','
 				}
 				await fs.appendFileSync(filename + index + '.csv', valStr)
@@ -145,7 +167,8 @@ function processSync(img) {
 	}
 
 	async function crawlerAll(index) {
-		let flag = await dealList(index);
+		let page = 1;
+		let flag = await dealList(index, page);
 		while (flag) {
 			console.log('crawlerList...');
 			try{
@@ -169,8 +192,9 @@ function processSync(img) {
 			console.log('crawlerList...4');
 			await driver.sleep(500);
 			await driver.executeScript("document.getElementsByClassName('paging-next')[0].click()");
+			page = page+1;
 			await driver.sleep(500);
-			flag = await dealList(index);
+			flag = await dealList(index, page);
 		}
 	}
 	// await crawlerAll();
