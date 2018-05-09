@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=1667;
+let current_index=1722;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -110,8 +110,8 @@ function processSync(img) {
 
   try {
   	await driver.get('https://login.zlbaba.com/login?service=http://www.patexplorer.com/login/cas');
-  	await driver.findElement(By.name('username')).sendKeys('');
-  	await driver.findElement(By.name('password')).sendKeys('');
+  	await driver.findElement(By.name('username')).sendKeys('15102716009');
+  	await driver.findElement(By.name('password')).sendKeys('196226qiang');
   	await driver.sleep(1000);
   	await driver.findElement(By.id('loginBtn')).click();
 	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
@@ -121,11 +121,13 @@ function processSync(img) {
 			let flag = true;
 			try{
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
+				console.log('###wait paging-next');
 			}catch(err) {
 				flag = await dealyzm();
 			}
 			await driver.sleep(Math.random() * 500 + 500)				
 			let divs = await driver.findElements(By.className('u-list-div'));
+			console.log('###get u-list-div');
 			await driver.sleep(Math.random() * 500 + 500)
 			for (let i = 0; i < divs.length; i++) {
 				let cols;
