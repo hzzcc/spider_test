@@ -9,7 +9,10 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=1722;
+let current_index=145;
+let current_page_index = 1;
+let current_item_index = 4;
+let firstRun = true;
 
 function processSync(img) {
 	return new Promise((resolve, reject) => {
@@ -117,6 +120,12 @@ function processSync(img) {
 	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
 
 	async function dealList(index, page) {
+			current_page_index = page;
+			if (firstRun) {
+				firstRun = false;
+			}else{
+				current_item_index = 0;
+			}
 			console.log('####dealList start page: ', page);
 			let flag = true;
 			try{
@@ -127,14 +136,16 @@ function processSync(img) {
 			}
 			await driver.sleep(Math.random() * 500 + 500)				
 			let divs = await driver.findElements(By.className('u-list-div'));
-			console.log('###get u-list-div');
+			console.log('###get u-list-div current_item_index:', current_item_index);
 			await driver.sleep(Math.random() * 500 + 500)
-			for (let i = 0; i < divs.length; i++) {
-				let cols;
-				try{
+			for (let i = current_item_index; i < divs.length; i++) {
+				current_item_index = i;
+				let cols = [];
+				try {
 					cols = await divs[i].findElements(By.css('.Js_hl div p'));
-				}catch(err) {
-					await driver.sleep(500);
+				} catch (err) {
+					console.log('###get item content error', err);
+					await driver.sleep(1000);
 					cols = await divs[i].findElements(By.css('.Js_hl div p'));
 				}
 				console.log('###get item vals');
@@ -146,30 +157,50 @@ function processSync(img) {
 					if (colTitDom.length) {
 						try {
 							colTit = await colTitDom[0].getText();
-						}catch(err) {
-							await driver.sleep(500);
-							colVals= await cols[j].getText();
+						} catch (err) {
+							console.log('###get col tit error', err);
+							await driver.sleep(1000);
+							colVals = await cols[j].getText();
 						}
 					}
 					let colVals;
-					try { 
-						colVals= await cols[j].getText();
-					}catch(err) {
-						await driver.sleep(500);
-						colVals= await cols[j].getText();
+					try {
+						colVals = await cols[j].getText();
+					} catch (err) {
+						console.log('###get col val error', err);
+						await driver.sleep(1000);
+						colVals = await cols[j].getText();
 					}
 					colVals = colVals.split(colTit)[1];
 					console.log('txt:', page, i, j, colTit, colVals)
-					valStr += colVals+','
+					valStr += colVals + ','
 				}
 				await fs.appendFileSync(filename + index + '.csv', valStr)
+				current_item_index = i+1;
 			}
 			console.log('####dealList end '+index);
 			return flag;
 	}
 
 	async function crawlerAll(index) {
-		let page = 1;
+		current_index = index;
+		if (firstRun) {
+			console.log('current_page_index: ', current_page_index);
+			try {
+				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
+				await driver.findElement(By.css('.btui-paging-jump>input')).clear();
+				await driver.findElement(By.css('.btui-paging-jump>input')).sendKeys(current_page_index, Key.RETURN);
+				await driver.sleep(500);
+				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
+			}catch(err) {
+				console.log('error:',err)
+			}
+		}else{
+			current_page_index = 1;
+			current_item_index = 0;
+		}
+
+		let page = current_page_index;
 		let flag = await dealList(index, page);
 		while (flag) {
 			console.log('crawlerList...');
@@ -195,7 +226,7 @@ function processSync(img) {
 			await driver.sleep(500);
 			await driver.executeScript("document.getElementsByClassName('paging-next')[0].click()");
 			page = page+1;
-			await driver.sleep(500);
+			await driver.sleep(Math.random() * 2000 + 1000);
 			flag = await dealList(index, page);
 		}
 	}
@@ -221,7 +252,9 @@ function processSync(img) {
 		
     while(true) {}
   } catch(err) {
-  	console.log(err);
+	  console.log(err);
+	  firstRun=true;
+	  await example();
   } finally {
     // await driver.quit();
   }
