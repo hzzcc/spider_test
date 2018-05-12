@@ -214,12 +214,7 @@ function processSync(img) {
 			await driver.sleep(500);
 			await driver.executeScript("document.getElementsByClassName('paging-next')[0].click()");
 			page = page+1;
-			try {
-				await driver.wait(until.elementLocated(By.css('#Js_listLoader .la-square-jelly-box.la-2x')), 500);
-				console.log('wait for loader...');
-			}catch(err) {
-				console.log('err:', err);
-			}
+			await driver.sleep(500);
 			flag = await dealList(index, page);
 		}
 	}
