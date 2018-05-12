@@ -9,9 +9,9 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=145;
+let current_index=285;
 let current_page_index = 1;
-let current_item_index = 4;
+let current_item_index = 0;
 let firstRun = true;
 
 function processSync(img) {
@@ -69,15 +69,16 @@ function processSync(img) {
 	  	await driver.sleep(2000);
 	  	let ok = false;
 	  	try {
-	  		await driver.wait(until.alertIsPresent(), 2000);
+			await driver.sleep(500);
+	  		await driver.wait(until.elementLocated(By.id('nocrawler_img')), 2000);
 	  	} catch (err) {
 	  		ok = true;
 	  	}
 	  	if (!ok) {
-	  		let alertDom = await driver.switchTo().alert();
+	  		// let alertDom = await driver.switchTo().alert();
 	  		while (alertDom) {
-				  await alertDom.accept();
-				  await driver.sleep(1000);
+				//   await alertDom.accept();
+				await driver.sleep(1000);
 	  			await driver.wait(until.elementLocated(By.id('nocrawler_img')), 3000);
 	  			nocrawler = await driver.findElements(By.id('nocrawler_img'));
 	  			if (nocrawler.length) {
@@ -94,8 +95,9 @@ function processSync(img) {
 	  				await driver.findElement(By.id('Button1')).click();
 	  				let ok = false;
 	  				try {
-	  					await driver.wait(until.alertIsPresent(), 2000);
-	  					alertDom = await driver.switchTo().alert();
+						await driver.sleep(500);
+	  					await driver.wait(until.elementLocated(By.id('nocrawler_img')), 2000);
+	  					alertDom = true;
 	  				} catch (err) {
 	  					ok = true;
 	  					alertDom = null;
@@ -132,6 +134,7 @@ function processSync(img) {
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 				console.log('###wait paging-next');
 			}catch(err) {
+				await driver.executeScript("window.alert = function alert (message) {console.log(message);};");
 				flag = await dealyzm();
 			}
 			await driver.sleep(Math.random() * 500 + 500)				
