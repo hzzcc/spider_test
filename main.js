@@ -75,7 +75,8 @@ function processSync(img) {
 	  		ok = true;
 	  	}
 	  	if (!ok) {
-	  		// let alertDom = await driver.switchTo().alert();
+			  // let alertDom = await driver.switchTo().alert();
+			let alertDom = true;
 	  		while (alertDom) {
 				//   await alertDom.accept();
 				await driver.sleep(1000);
