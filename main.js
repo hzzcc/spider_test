@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=285;
+let current_index=292;
 let current_page_index = 1;
 let current_item_index = 0;
 let firstRun = true;
@@ -30,7 +30,10 @@ function processSync(img) {
 							}else {
 								let str = data.toString();
 								console.log(str);								
-								str = str.replace(/\n/g,'').replace(/>/g,'7').replace(/-/g,'L').replace('<','L');
+								str = str.replace(/\n/g,'')
+										.replace(/>/g,'7').replace(/-/g,'L')
+										.replace(/</g,'L').replace(/\?/,'7')
+										.replace(/\s/g, '');
 								console.log(str);
 								resolve(str);
 							}
@@ -48,65 +51,35 @@ function processSync(img) {
 	try {
 	  let nocrawler, flag;
 	  try {
-	  	await driver.wait(until.elementLocated(By.id('nocrawler_img')), 10000);
+	  	await driver.wait(until.elementLocated(By.id('nocrawler_img')), 5000);
 	  	nocrawler = await driver.findElements(By.id('nocrawler_img'));
 	  	flag = true;
 	  } catch (err) {
 	  	flag = false;
 	  }
-	  if (nocrawler && nocrawler.length) {
-	  	await driver.sleep(1000);
-	  	let src = await nocrawler[0].getAttribute('src');
-	  	var base64Data = src.replace(/^data:image\/\w+;base64,/, "")
-	  	var dataBuffer = new Buffer(base64Data, 'base64');
-	  	await fs.writeFileSync(imageFile, dataBuffer);
-	  	let txt = await processSync(path.join(__dirname, imageFile));
-	  	console.log(JSON.stringify(txt));
-	  	await driver.sleep(Math.random() * 1000);
-	  	await driver.findElement(By.id('code')).clear();
-	  	await driver.findElement(By.id('code')).sendKeys(txt);
-	  	await driver.findElement(By.id('Button1')).click();
-	  	await driver.sleep(2000);
-	  	let ok = false;
-	  	try {
-			await driver.sleep(500);
-	  		await driver.wait(until.elementLocated(By.id('nocrawler_img')), 2000);
-	  	} catch (err) {
-	  		ok = true;
-	  	}
-	  	if (!ok) {
-			  // let alertDom = await driver.switchTo().alert();
-			let alertDom = true;
-	  		while (alertDom) {
-				//   await alertDom.accept();
+		let ok = false;
+		while (!ok) {
+			//   await alertDom.accept();
+			await driver.sleep(1000);
+			await driver.wait(until.elementLocated(By.id('nocrawler_img')), 2000);
+			nocrawler = await driver.findElements(By.id('nocrawler_img'));
+			if (nocrawler.length) {
 				await driver.sleep(1000);
-	  			await driver.wait(until.elementLocated(By.id('nocrawler_img')), 3000);
-	  			nocrawler = await driver.findElements(By.id('nocrawler_img'));
-	  			if (nocrawler.length) {
-	  				await driver.sleep(1000);
-	  				src = await nocrawler[0].getAttribute('src');
-	  				base64Data = src.replace(/^data:image\/\w+;base64,/, "")
-	  				dataBuffer = new Buffer(base64Data, 'base64');
-	  				await fs.writeFileSync(imageFile, dataBuffer);
-	  				txt = await processSync(path.join(__dirname, imageFile));
-	  				console.log(JSON.stringify(txt));
-	  				await driver.sleep(Math.random() * 1000);
-	  				await driver.findElement(By.id('code')).clear();
-	  				await driver.findElement(By.id('code')).sendKeys(txt);
-	  				await driver.findElement(By.id('Button1')).click();
-	  				let ok = false;
-	  				try {
-						await driver.sleep(500);
-	  					await driver.wait(until.elementLocated(By.id('nocrawler_img')), 2000);
-	  					alertDom = true;
-	  				} catch (err) {
-	  					ok = true;
-	  					alertDom = null;
-	  				}
-	  			}
-	  		}
-	  	}
-	  }
+				let src = await nocrawler[0].getAttribute('src');
+				let base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+				let dataBuffer = new Buffer(base64Data, 'base64');
+				await fs.writeFileSync(imageFile, dataBuffer);
+				let txt = await processSync(path.join(__dirname, imageFile));
+				console.log(JSON.stringify(txt));
+				await driver.sleep(Math.random() * 1000);
+				await driver.findElement(By.id('code')).clear();
+				await driver.findElement(By.id('code')).sendKeys(txt);
+				await driver.findElement(By.id('Button1')).click();
+				ok = false;
+			}else {
+				ok = true;
+			}
+		}
 	  return flag;
 	}catch(err) {
 		console.log(err);
@@ -217,6 +190,7 @@ function processSync(img) {
 			console.log('crawlerList...1');
 			let fd = await driver.findElements(By.css('.paging-next.paging-disabled'))
 			flag = fd.length == 0;
+			console.log('paging-disabled len: ', fd.length);
 			if (!flag) return;
 			console.log('crawlerList...2');
 			let dloadDom = await driver.findElements(By.css('.list-l-download'));

@@ -221,12 +221,12 @@ if __name__=='__main__':
         midu_image_name_pro1 = fpathandname+"_pro1"+fext
         filter_enhance(midu_image_name, midu_image_name_pro1)
         # 字符分割
-        # num = 4
-        # midu_image_name_pro2 = fpathandname+"_pro2"+fext
-        # seg(midu_image_name_pro1, midu_image_name_pro2, num)
+        num = 4
+        midu_image_name_pro2 = fpathandname+"_pro2"+fext
+        seg(midu_image_name_pro1, midu_image_name_pro2, num)
 
         # im = Image.open(midu_image_name)
         # text = image_to_string(im)
         # print text.replace("\n", "")
-        text = image_file_to_string(midu_image_name_pro1, bool_digits=digits)
+        text = image_file_to_string(midu_image_name_pro2, bool_digits=digits)
         print text.replace("\n", "")

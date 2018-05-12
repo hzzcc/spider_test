@@ -17,7 +17,7 @@ def call_tesseract(input_filename, output_filename, bool_digits=False):
         # args = tesseract_exe_name+" "+input_filename+" "+output_filename+" -l eng -psm 7 nobatch eng_digits" # price
         args = tesseract_exe_name+" "+input_filename+" "+output_filename+" -l test_digits -psm 7 nobatch" # price
     else:
-        args = tesseract_exe_name+" "+input_filename+" "+output_filename+" -l eng -psm 7 nobatch eng_characters" # English letters
+        args = tesseract_exe_name+" "+input_filename+" "+output_filename+" -l eng -psm 7 words" # English letters
         # args = tesseract_exe_name+" "+input_filename+" "+output_filename+" -l test_eng -psm 7 nobatch" # English letters
     # print args
     proc = subprocess.Popen(args, shell=True)
