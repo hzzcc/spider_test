@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=313;
+let current_index=330;
 let current_page_index = 1;
 let current_item_index = 0;
 let firstRun = true;
@@ -107,8 +107,15 @@ function processSync(img) {
 				await driver.wait(until.elementLocated(By.css('.paging-next')), 5000);
 				console.log('###wait paging-next');
 			}catch(err) {
-				await driver.executeScript("window.alert = function alert (message) {console.log(message);};");
-				flag = await dealyzm();
+				console.log('not found paging-next err:', err);
+				try {
+					await driver.wait(until.elementLocated('#Js_listLoader .la-square-jelly-box.la-2x'), 500);
+					return await this.dealList(index, page);
+				} catch (err) {
+					console.log('not found loader err:', err);
+					await driver.executeScript("window.alert = function alert (message) {console.log(message);};");
+					flag = await dealyzm();
+				}
 			}
 			let divs = await driver.findElements(By.className('u-list-div'));
 			console.log('###get u-list-div current_item_index:', current_item_index);
@@ -205,7 +212,11 @@ function processSync(img) {
 			await driver.sleep(500);
 			await driver.executeScript("document.getElementsByClassName('paging-next')[0].click()");
 			page = page+1;
-			await driver.sleep(Math.random() * 500 + 500);
+			try {
+				await driver.wait(until.elementLocated('#Js_listLoader .la-square-jelly-box.la-2x'), 500);
+			}catch(err) {
+				console.log('err:', err);
+			}
 			flag = await dealList(index, page);
 		}
 	}
