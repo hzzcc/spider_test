@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=295;
+let current_index=309;
 let current_page_index = 1;
 let current_item_index = 0;
 let firstRun = true;
@@ -60,7 +60,7 @@ function processSync(img) {
 		let ok = !(nocrawler && nocrawler.length);
 		while (!ok) {
 			//   await alertDom.accept();
-			await driver.sleep(1000);
+			await driver.sleep(500);
 			try {
 				await driver.wait(until.elementLocated(By.id('nocrawler_img')), 2000);
 			}catch(err) {
@@ -68,14 +68,13 @@ function processSync(img) {
 			}
 			nocrawler = await driver.findElements(By.id('nocrawler_img'));
 			if (nocrawler.length) {
-				await driver.sleep(1000);
 				let src = await nocrawler[0].getAttribute('src');
 				let base64Data = src.replace(/^data:image\/\w+;base64,/, "")
 				let dataBuffer = new Buffer(base64Data, 'base64');
 				await fs.writeFileSync(imageFile, dataBuffer);
 				let txt = await processSync(path.join(__dirname, imageFile));
 				console.log(JSON.stringify(txt));
-				await driver.sleep(Math.random() * 1000);
+				await driver.sleep(Math.random() * 500 + 500);
 				await driver.findElement(By.id('code')).clear();
 				await driver.findElement(By.id('code')).sendKeys(txt);
 				await driver.findElement(By.id('Button1')).click();
