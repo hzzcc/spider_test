@@ -55,9 +55,9 @@ function processSync(img) {
 	  	nocrawler = await driver.findElements(By.id('nocrawler_img'));
 	  	flag = true;
 	  } catch (err) {
-	  	flag = false;
+	  	return flag = false;
 	  }
-		let ok = false;
+		let ok = !(nocrawler && nocrawler.length);
 		while (!ok) {
 			//   await alertDom.accept();
 			await driver.sleep(1000);
