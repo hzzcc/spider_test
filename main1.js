@@ -7,7 +7,7 @@ var exec = require('child_process').exec;
 
 let filename = 'rslt1/';
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-let current_index = 1;
+let current_index = 7;
 let current_year = 0;
 let current_page_index = 0;
 
@@ -64,7 +64,7 @@ function replaceNbsps(str) {
                 await driver.sleep(500);
                 await driver.findElement(By.id('tableSearchItemIdIVDB020')).clear();
                 await driver.findElement(By.id('tableSearchItemIdIVDB007')).clear();
-                await driver.findElement(By.id('tableSearchItemIdIVDB020')).sendKeys(dataList[i].name);
+                await driver.findElement(By.id('tableSearchItemIdIVDB020')).sendKeys(JSON.stringify(dataList[i].name));
                 await driver.findElement(By.id('tableSearchItemIdIVDB007')).sendKeys(year + "");
                 await driver.sleep(500);
                 await driver.findElement(By.css('.bottom-area .btn.btn-search')).click();
