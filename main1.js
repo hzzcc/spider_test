@@ -61,7 +61,7 @@ function replaceNbsps(str) {
                 //start per
                 console.log(i, ',跳转高级检索页面');
                 await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/patentsearch/tableSearch-showTableSearchIndex.shtml'));
-                await driver.sleep(500);
+                await driver.wait(until.elementLocated(By.id('tableSearchItemIdIVDB020')));
                 await driver.findElement(By.id('tableSearchItemIdIVDB020')).clear();
                 await driver.findElement(By.id('tableSearchItemIdIVDB007')).clear();
                 await driver.findElement(By.id('tableSearchItemIdIVDB020')).sendKeys(JSON.stringify(dataList[i].name));
