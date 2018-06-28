@@ -7,7 +7,7 @@ var exec = require('child_process').exec;
 
 let filename = 'rslt1/';
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-let current_index = 7;
+let current_index = 0;
 let current_year = 0;
 let current_page_index = 0;
 
@@ -97,20 +97,20 @@ function replaceNbsps(str) {
                 await fs.appendFileSync(filename + year + "/total.csv", `${index},${total}\n`);
             }
 
-            let str = '';
+            let str = `${index},${page},`;
             let allList = await driver.findElements(By.css('.list-container .patent'));
             console.log('allList: ', allList.length);
 
-            for (let index = 0; index < allList.length; index++) {
-                const ele = allList[index];
+            for (let j = 0; j < allList.length; j++) {
+                const ele = allList[j];
                 let name = await ele.findElement(By.css('.item-header h1 a b')).getText();
-                console.log(index, ': ', name);
+                console.log(j, ': ', name);
                 let tags = await ele.findElements(By.css('.item-header .btn-group .btn'));
-                let valStr = name;
+                let valStr = j + "," + name;
                 for (let j = 0; j < tags.length; j++) {
                     const tag = tags[j];
                     let tagText = await tag.getText();
-                    console.log(index + ",tag: ", tagText);
+                    console.log(j + ",tag: ", tagText);
                     valStr += "," + tagText;
                 }
                 str += valStr + "\n";
