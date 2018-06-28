@@ -97,7 +97,7 @@ function replaceNbsps(str) {
                 await fs.appendFileSync(filename + year + "/total.csv", `${index},${total}\n`);
             }
 
-            let str = `${index},${page},`;
+            let str = "";
             let allList = await driver.findElements(By.css('.list-container .patent'));
             console.log('allList: ', allList.length);
 
@@ -106,7 +106,7 @@ function replaceNbsps(str) {
                 let name = await ele.findElement(By.css('.item-header h1 a b')).getText();
                 console.log(j, ': ', name);
                 let tags = await ele.findElements(By.css('.item-header .btn-group .btn'));
-                let valStr = j + "," + name;
+                let valStr = `${index},${page},${j},${name}`;
                 for (let j = 0; j < tags.length; j++) {
                     const tag = tags[j];
                     let tagText = await tag.getText();
