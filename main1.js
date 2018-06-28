@@ -78,7 +78,7 @@ function replaceNbsps(str) {
         await next_page.click();
 
         async function dealList(index, year, page) {
-            current_page_index = index;
+            current_page_index = page;
             console.log('begin request all list: ', index, year, page);
             let byBlocking = By.css('.blockUI.blockMsg.blockPage');
             await driver.wait(until.elementLocated(byBlocking));
