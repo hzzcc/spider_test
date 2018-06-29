@@ -7,8 +7,8 @@ var exec = require('child_process').exec;
 
 let filename = 'rslt1/';
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-let current_index = 0;
-let current_year = 0;
+let current_index = 149;
+let current_year = 4;
 let current_page_index = 0;
 
 function replaceNbsps(str) {
@@ -22,11 +22,19 @@ function replaceNbsps(str) {
 
     try {
         await driver.get('http://www.pss-system.gov.cn/sipopublicsearch/portal/uilogin-forwardLogin.shtml');
-        await driver.findElement(By.id('j_username')).sendKeys('haozididi2018');
-        await driver.findElement(By.id('j_password_show')).sendKeys('196226qiang');
+        await driver.findElement(By.id('j_username')).sendKeys('');
+        await driver.findElement(By.id('j_password_show')).sendKeys('');
         await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/portal/uiIndex.shtml'));
         console.log('logged in');
-        await driver.executeScript("window.open = function(location) {window.location = location}");
+        await driver.executeScript(`
+            window.open = function(location) {
+                console.log('open:',location);
+                if (location.indexOf('uishowStatisticPage-initStatisticPage.shtml') == -1) {
+                    window.location = location;
+                }
+            }; 
+            window.alert = function(msg) {console.log('alert:',msg)}; 
+            window.confirm = function(msg) {console.log('confirm:',msg)};`);
         await driver.executeScript("window.open('http://www.pss-system.gov.cn/sipopublicsearch/patentsearch/tableSearch-showTableSearchIndex.shtml')");
         
         async function getNextPage() {
@@ -71,12 +79,11 @@ function replaceNbsps(str) {
 
                 await crawlerAll(year, i);
             }   
+            current_index = 0;
         }
 
         //
         
-        await next_page.click();
-
         async function dealList(index, year, page) {
             current_page_index = page;
             console.log('begin request all list: ', index, year, page);

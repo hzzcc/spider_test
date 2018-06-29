@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 let filename = 'rslt/rslt';
 let imageFile = './ImageRecognize/pic/get_random_image.png';
 
-let current_index=331;
+let current_index=662;
 let current_page_index = 1;
 let current_item_index = 0;
 let firstRun = true;
@@ -48,6 +48,7 @@ function processSync(img) {
   
   async function dealyzm() {
 	console.log('deal yanzhengma');
+	await driver.executeScript("window.alert = function alert (message) {console.log(message);};");
 	try {
 	  let nocrawler, flag;
 	  try {
@@ -92,11 +93,15 @@ function processSync(img) {
 
   try {
   	await driver.get('https://login.zlbaba.com/login?service=http://www.patexplorer.com/login/cas');
-  	await driver.findElement(By.name('username')).sendKeys('15102716009');
-  	await driver.findElement(By.name('password')).sendKeys('196226qiang');
+  	await driver.findElement(By.name('username')).sendKeys('');
+  	await driver.findElement(By.name('password')).sendKeys('');
   	await driver.sleep(1000);
-  	await driver.findElement(By.id('loginBtn')).click();
-	await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
+	  await driver.findElement(By.id('loginBtn')).click();
+	  try {
+		await driver.wait(until.urlIs('http://www.patexplorer.com/'), 10000);
+	  }catch (err) {
+		  await dealyzm();
+	  }
 
 	async function dealList(index, page) {
 			current_page_index = page;
@@ -114,11 +119,15 @@ function processSync(img) {
 					return await this.dealList(index, page);
 				} catch (err) {
 					console.log('not found loader err:', err);
-					await driver.executeScript("window.alert = function alert (message) {console.log(message);};");
 					flag = await dealyzm();
 				}
 			}
 			await driver.sleep(Math.random() * 500 + 500)
+			try {
+				await driver.wait(until.elementLocated(By.css('.u-list-div')), 5000);
+			}catch (err) {
+				return flag;
+			}
 			let divs = await driver.findElements(By.className('u-list-div'));
 			console.log('###get u-list-div current_item_index:', current_item_index, divs.length);
 			await driver.sleep(Math.random() * 500 + 500)
