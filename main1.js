@@ -5,11 +5,17 @@ const fs = require('fs');
 const path = require('path');
 var exec = require('child_process').exec;
 
-let filename = 'rslt1/';
+let filename = 'rslt2/';
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-let current_index = 149;
-let current_year = 4;
-let current_page_index = 0;
+let current_index = 145;
+let current_year = 0;
+let current_page_index = 44;
+let isNotFirst = false;
+
+let oldConsole = console.log;
+console.log = function(...args) {
+    oldConsole(new Date().toLocaleString(), ": ", ...args);
+}
 
 function replaceNbsps(str) {
     var re = new RegExp(String.fromCharCode(160), "g");
@@ -22,8 +28,12 @@ function replaceNbsps(str) {
 
     try {
         await driver.get('http://www.pss-system.gov.cn/sipopublicsearch/portal/uilogin-forwardLogin.shtml');
-        await driver.findElement(By.id('j_username')).sendKeys('');
-        await driver.findElement(By.id('j_password_show')).sendKeys('');
+        // await driver.findElement(By.id('j_username')).sendKeys('haoqiang_wu');
+        // await driver.findElement(By.id('j_username')).sendKeys('haozididi2018');
+        await driver.findElement(By.id('j_username')).sendKeys('wu1371597706');
+        await driver.findElement(By.id('j_password_show')).sendKeys('196226qiang');
+        // await driver.findElement(By.id('j_username')).sendKeys('hzz_cc');
+        // await driver.findElement(By.id('j_password_show')).sendKeys('huangclh520');
         await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/portal/uiIndex.shtml'));
         console.log('logged in');
         await driver.executeScript(`
@@ -52,11 +62,14 @@ function replaceNbsps(str) {
 
         async function crawlerAll(year, index) {
             console.log('crawlerAll: ', index);
-            current_page_index = 0;
+            if (isNotFirst) {
+                current_page_index = 0;
+            }
+            isNotFirst = true;
             await dealList(index, year, current_page_index);
             let hasNext = await getNextPage();
             while (hasNext) {
-                hasNext.click();
+                await hasNext.click();
                 current_page_index = current_page_index + 1;
                 await dealList(index, year, current_page_index);
                 hasNext = await getNextPage();
@@ -69,13 +82,31 @@ function replaceNbsps(str) {
                 //start per
                 console.log(i, ',跳转高级检索页面');
                 await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/patentsearch/tableSearch-showTableSearchIndex.shtml'));
-                await driver.wait(until.elementLocated(By.id('tableSearchItemIdIVDB020')));
+                try {
+                    await driver.wait(until.elementLocated(By.id('tableSearchItemIdIVDB020')), 1000);
+                }catch(err) {
+
+                }
                 await driver.findElement(By.id('tableSearchItemIdIVDB020')).clear();
                 await driver.findElement(By.id('tableSearchItemIdIVDB007')).clear();
                 await driver.findElement(By.id('tableSearchItemIdIVDB020')).sendKeys(JSON.stringify(dataList[i].name));
                 await driver.findElement(By.id('tableSearchItemIdIVDB007')).sendKeys(year + "");
-                await driver.sleep(500);
                 await driver.findElement(By.css('.bottom-area .btn.btn-search')).click();
+
+
+                if (current_page_index > 0) {
+                    let byBlocking = By.css('.blockUI.blockMsg.blockPage');
+                    try {
+                        await driver.wait(until.elementLocated(byBlocking), 500);
+                        let blocking = await driver.findElement(byBlocking)
+                        await driver.wait(until.stalenessOf(blocking), 500);
+                    } catch (err) {
+
+                    }
+                    await driver.wait(until.elementLocated(By.css('.input_bottom input')));
+                    await driver.findElement(By.css('.input_bottom input')).clear();
+                    await driver.findElement(By.css('.input_bottom input')).sendKeys((current_page_index + 1) + "", Key.RETURN);
+                }
 
                 await crawlerAll(year, i);
             }   
@@ -88,43 +119,137 @@ function replaceNbsps(str) {
             current_page_index = page;
             console.log('begin request all list: ', index, year, page);
             let byBlocking = By.css('.blockUI.blockMsg.blockPage');
-            await driver.wait(until.elementLocated(byBlocking));
-            let blocking = await driver.findElement(byBlocking)
-            await driver.wait(until.stalenessOf(blocking));
-            console.log('has requested all list');
-            await driver.sleep(500);
+            try {
+                await driver.wait(until.elementLocated(byBlocking), 1500);
+                let blocking = await driver.findElement(byBlocking)
+                await driver.wait(until.stalenessOf(blocking), 1500);
+            }catch(err) {
 
-            if (page === 0) {
-                let total = await driver.findElement(By.css("#page_top .page_top")).getText();
-                let arr = total.split("页");
-                let tmpStr = arr.length === 3 ? total.split("页")[2] : total.split("页")[1];
-                total = replaceNbsps(tmpStr.split("条数据")[0].replace(" ", ""));
-                console.log('total: "' + total + '"');
-
-                await fs.appendFileSync(filename + year + "/total.csv", `${index},${total}\n`);
             }
+            console.log('has requested all list');
+            await driver.sleep(1500 + Math.random() * 500);
+
+            // if (page === 0) {
+            //     let total = await driver.findElement(By.css("#page_top .page_top")).getText();
+            //     let arr = total.split("页");
+            //     let tmpStr = arr.length === 3 ? total.split("页")[2] : total.split("页")[1];
+            //     total = replaceNbsps(tmpStr.split("条数据")[0].replace(" ", ""));
+            //     console.log('total: "' + total + '"');
+
+            //     await fs.appendFileSync(filename + year + "/total.csv", `${index},${total}\n`);
+            // }
 
             let str = "";
             let allList = await driver.findElements(By.css('.list-container .patent'));
             console.log('allList: ', allList.length);
 
-            for (let j = 0; j < allList.length; j++) {
-                const ele = allList[j];
+            for (let i = 0; i < allList.length; i++) {
+                const ele = allList[i];
                 let name = await ele.findElement(By.css('.item-header h1 a b')).getText();
-                console.log(j, ': ', name);
+                console.log(i, ': ', name);
                 let tags = await ele.findElements(By.css('.item-header .btn-group .btn'));
-                let valStr = `${index},${page},${j},${name}`;
+                let valStr = `${index},${page},${i},${name}`;
                 for (let j = 0; j < tags.length; j++) {
                     const tag = tags[j];
                     let tagText = await tag.getText();
                     console.log(j + ",tag: ", tagText);
+                    if (tagText.indexOf("引证") !== -1) {
+                        let yinzhengnum = parseInt(tagText.replace("引证：", ""));
+                        if (yinzhengnum > 0) {
+                            await driver.executeScript(`
+                                var jqmenu = document.getElementById('view_mode_selector');
+                                jqmenu && jqmenu.remove();
+                            `)
+                            console.log('remove jq-select-menu');
+                            await driver.sleep(500 + Math.random() * 800);
+                            console.log('tag click');
+                            await removeOverlay();
+                            await tag.click();
+                            await dealRefList(index, year, page, i);
+                            try {
+                                await driver.wait(until.elementLocated(By.css(".blockUI.blockOverlay")), 500);
+                                blocking = await driver.findElement(By.css(".blockUI.blockOverlay"))
+                                await driver.wait(until.stalenessOf(blocking), 500);
+                            } catch (err) {
+
+                            }
+                            await removeOverlay();
+                            try {
+                                await driver.findElement(By.css('.ui-dialog-grid .ui-dialog-close')).click();
+                            }catch(err) {
+
+                            }
+                        }
+                    }
                     valStr += "," + tagText;
                 }
                 str += valStr + "\n";
             }
-            await fs.appendFileSync(filename + year + "/rslt" + index + '.csv', str);
+            // await fs.appendFileSync(filename + year + "/rslt" + index + '.csv', str);
             console.log('####dealList end ' + index);
         }
+
+        async function removeOverlay() {
+            await driver.executeScript(`
+                var blocks = document.getElementsByClassName('blockOverlay');
+                var blockLen = blocks.length;
+                for (var i = blockLen - 1; i >= 0; i--) {
+                    blocks[i].remove();
+                }
+            `)
+        }
+
+        async function dealRefList(index, year, page, i, refPage = 0) {
+            console.log('dealRefList..');
+            try {
+                await driver.wait(until.elementLocated(By.css(".blockUI.blockOverlay")), 500);
+                let blocking = await driver.findElement(By.css(".blockUI.blockOverlay"))
+                await driver.wait(until.stalenessOf(blocking), 500);
+            }catch(err) {
+
+            }
+            await driver.sleep(300 + Math.random() * 500);
+            let trs = await driver.findElements(By.css('#containerLeftTable table tbody tr'));
+            console.log('table tr len: ', trs.length);
+            for (let m = 0; m < trs.length; m++) {
+                const tr = trs[m];
+                let tds = await tr.findElements(By.css('td'));
+                let refs = await tds[5].getText();
+                console.log('=============================')
+                console.log(index, year, page, i, refPage, refs);
+                let refsArr = refs.split(";");
+                for (let l = 0; l < refsArr.length; l++) {
+                    const rf = refsArr[l];
+                    let fd = dataList.find(function (r) { return rf.indexOf(r.name) !== -1 });
+                    if (fd) {
+                        let str = `${index},${page},${i},${fd.name}\n`;
+                        await fs.appendFileSync(filename + year + "/rslt" + index + '.csv', str);
+                    }
+                }
+                console.log('=============================')
+            }
+            await driver.executeScript("var sd = document.getElementsByClassName('ui-dialog-content')[0]; sd && (sd.scrollTop = 500)");
+            let pageCont = await driver.findElements(By.css('#paginationLeftId ul li'));
+            let activePage;
+            try {
+                activePage = await driver.findElement(By.css('#paginationLeftId ul li.active')).getText();
+            } catch(err) {
+
+            }
+            if (activePage && activePage < pageCont.length) {
+                await driver.executeScript(`
+                    var blocks = document.getElementsByClassName('blockOverlay');
+                    var blockLen = blocks.length;
+                    for (var i = blockLen - 1; i >= 0; i--) {
+                        blocks[i].remove();
+                    }
+                `)
+                await pageCont[activePage].findElement(By.css('a')).click();
+                await dealRefList(index, year, page, i, ++refPage);
+            }
+
+        }
+
 
         while (true) { }
     }catch(err) {
