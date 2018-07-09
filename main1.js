@@ -7,9 +7,9 @@ var exec = require('child_process').exec;
 
 let filename = 'rslt2/';
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-let current_index = 145;
+let current_index = 149;
 let current_year = 0;
-let current_page_index = 44;
+let current_page_index = 491;
 let isNotFirst = false;
 
 let oldConsole = console.log;
@@ -30,10 +30,10 @@ function replaceNbsps(str) {
         await driver.get('http://www.pss-system.gov.cn/sipopublicsearch/portal/uilogin-forwardLogin.shtml');
         // await driver.findElement(By.id('j_username')).sendKeys('haoqiang_wu');
         // await driver.findElement(By.id('j_username')).sendKeys('haozididi2018');
-        await driver.findElement(By.id('j_username')).sendKeys('wu1371597706');
-        await driver.findElement(By.id('j_password_show')).sendKeys('196226qiang');
-        // await driver.findElement(By.id('j_username')).sendKeys('hzz_cc');
-        // await driver.findElement(By.id('j_password_show')).sendKeys('huangclh520');
+        // await driver.findElement(By.id('j_username')).sendKeys('wu1371597706');
+        // await driver.findElement(By.id('j_password_show')).sendKeys('196226qiang');
+        await driver.findElement(By.id('j_username')).sendKeys('hzz_cc');
+        await driver.findElement(By.id('j_password_show')).sendKeys('huangclh520');
         await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/portal/uiIndex.shtml'));
         console.log('logged in');
         await driver.executeScript(`
@@ -97,9 +97,9 @@ function replaceNbsps(str) {
                 if (current_page_index > 0) {
                     let byBlocking = By.css('.blockUI.blockMsg.blockPage');
                     try {
-                        await driver.wait(until.elementLocated(byBlocking), 500);
+                        await driver.wait(until.elementLocated(byBlocking), 2500);
                         let blocking = await driver.findElement(byBlocking)
-                        await driver.wait(until.stalenessOf(blocking), 500);
+                        await driver.wait(until.stalenessOf(blocking), 2500);
                     } catch (err) {
 
                     }
@@ -120,9 +120,9 @@ function replaceNbsps(str) {
             console.log('begin request all list: ', index, year, page);
             let byBlocking = By.css('.blockUI.blockMsg.blockPage');
             try {
-                await driver.wait(until.elementLocated(byBlocking), 1500);
+                await driver.wait(until.elementLocated(byBlocking), 2500);
                 let blocking = await driver.findElement(byBlocking)
-                await driver.wait(until.stalenessOf(blocking), 1500);
+                await driver.wait(until.stalenessOf(blocking), 2500);
             }catch(err) {
 
             }
@@ -167,9 +167,9 @@ function replaceNbsps(str) {
                             await tag.click();
                             await dealRefList(index, year, page, i);
                             try {
-                                await driver.wait(until.elementLocated(By.css(".blockUI.blockOverlay")), 500);
+                                await driver.wait(until.elementLocated(By.css(".blockUI.blockOverlay")), 2500);
                                 blocking = await driver.findElement(By.css(".blockUI.blockOverlay"))
-                                await driver.wait(until.stalenessOf(blocking), 500);
+                                await driver.wait(until.stalenessOf(blocking), 2500);
                             } catch (err) {
 
                             }
@@ -202,9 +202,9 @@ function replaceNbsps(str) {
         async function dealRefList(index, year, page, i, refPage = 0) {
             console.log('dealRefList..');
             try {
-                await driver.wait(until.elementLocated(By.css(".blockUI.blockOverlay")), 500);
+                await driver.wait(until.elementLocated(By.css(".blockUI.blockOverlay")), 2500);
                 let blocking = await driver.findElement(By.css(".blockUI.blockOverlay"))
-                await driver.wait(until.stalenessOf(blocking), 500);
+                await driver.wait(until.stalenessOf(blocking), 2500);
             }catch(err) {
 
             }
@@ -254,6 +254,8 @@ function replaceNbsps(str) {
         while (true) { }
     }catch(err) {
         console.error(err);
+        isNotFirst = false;
+        await example();
     }finally {
         // await driver.quit();
     }
