@@ -38,38 +38,31 @@ function replaceNbsps(str) {
 
         await driver.wait(until.elementLocated(By.id('codePic')));
 
-        nocrawler = await driver.findElements(By.id('codePic'));
+        let nocrawler = await driver.findElements(By.id('codePic'));
         if (nocrawler.length) {
-            let src = await nocrawler[0].getAttribute('src');
-            console.log('src:', src);
-
-            let response = driver.executeAsyncScript(`
-                var callback = arguments[arguments.length - 1];
-                var img = new Image();
-                img.crossOrigin = 'Anonymous';
-                img.onload = function() {
-                    var canvas = document.createElement('CANVAS');
-                    var ctx = canvas.getContext('2d');
-                    var dataURL;
-                    canvas.height = this.naturalHeight;
-                    canvas.width = this.naturalWidth;
-                    ctx.drawImage(this, 0, 0);
-                    dataURL = canvas.toDataURL();
-                    callback(dataURL);
-                };
-                img.src = '${src}';
+            let src = await driver.executeScript(`
+                var img = document.getElementById('codePic');
+                var canvas = document.createElement('CANVAS');
+                var ctx = canvas.getContext('2d');
+                var dataURL;
+                canvas.height = img.naturalHeight;
+                canvas.width = img.naturalWidth;
+                ctx.drawImage(img, 0, 0);
+                dataURL = canvas.toDataURL();
+                console.log('dataURL:',dataURL);
+                return dataURL;
             `)
-            console.log('img response :', response)
+            console.log('img response :', src)
 
-            // let base64Data = src.replace(/^data:image\/\w+;base64,/, "")
-            // let dataBuffer = new Buffer(base64Data, 'base64');
-            // await fs.writeFileSync(imageFile, dataBuffer);
-            // let txt = await processSync(path.join(__dirname, imageFile));
-            // console.log(JSON.stringify(txt));
-            // await driver.sleep(Math.random() * 500 + 500);
-            // await driver.findElement(By.id('code')).clear();
-            // await driver.findElement(By.id('code')).sendKeys(txt);
-            // await driver.findElement(By.id('Button1')).click();
+            let base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+            let dataBuffer = new Buffer(base64Data, 'base64');
+            await fs.writeFileSync(imageFile, dataBuffer);
+            let txt = await processSync(path.join(__dirname, imageFile));
+            console.log(JSON.stringify(txt));
+            await driver.sleep(Math.random() * 500 + 500);
+            await driver.findElement(By.id('code')).clear();
+            await driver.findElement(By.id('code')).sendKeys(txt);
+            await driver.findElement(By.id('Button1')).click();
         } else {
         }
         return;
