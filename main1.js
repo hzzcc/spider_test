@@ -79,6 +79,7 @@ function replaceNbsps(str) {
 
                     await crawlerAll(year, i);
                     current_page_index = 0;
+                    current_index++;
                 }   
                 current_index = 0;
             }
@@ -203,6 +204,11 @@ function replaceNbsps(str) {
 
         }
         await driver.sleep(300 + Math.random() * 500);
+        try {
+            await driver.wait(until.elementLocated(By.css("#containerLeftTable table tbody tr")), 5000);
+        }catch(err) {
+
+        }
         let trs = await driver.findElements(By.css('#containerLeftTable table tbody tr'));
         console.log('table tr len: ', trs.length);
         for (let m = 0; m < trs.length; m++) {
