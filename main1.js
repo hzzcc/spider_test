@@ -9,9 +9,9 @@ let filename = 'rslt2/';
 let imageFile = './pic/get_random_image.png';
 
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-let current_index = 26;
-let current_year = 2;
-let current_page_index = 21;
+let current_index = 149;
+let current_year = 0;
+let current_page_index = 557;
 let isNotFirst = false;
 
 let oldConsole = console.log;
@@ -28,6 +28,70 @@ function replaceNbsps(str) {
 (async function example() {
     let driver = await new Builder().forBrowser('chrome').build();
 
+    try {
+        await driver.get('http://www.pss-system.gov.cn/sipopublicsearch/portal/uilogin-forwardLogin.shtml');
+        // await driver.findElement(By.id('j_username')).sendKeys('haoqiang_wu');
+        // await driver.findElement(By.id('j_username')).sendKeys('haozididi2018');
+        await driver.findElement(By.id('j_username')).sendKeys('han670786269');
+        await driver.findElement(By.id('j_password_show')).sendKeys('hanwei19930904');
+        // await driver.findElement(By.id('j_username')).sendKeys('cui1187199836');
+        // await driver.findElement(By.id('j_password_show')).sendKeys('cuijianan1187199836');
+        // await driver.findElement(By.id('j_password_show')).sendKeys('hanwei19930904');
+        // await driver.findElement(By.id('j_username')).sendKeys('hzz_cc');
+        // await driver.findElement(By.id('j_password_show')).sendKeys('huangclh520');
+
+        // await driver.wait(until.elementLocated(By.id('codePic')));
+
+        // let nocrawler = await driver.findElements(By.id('codePic'));
+        // if (nocrawler.length) {
+        //     let src = await driver.executeScript(`
+        //         var img = document.getElementById('codePic');
+        //         var canvas = document.createElement('CANVAS');
+        //         var ctx = canvas.getContext('2d');
+        //         var dataURL;
+        //         canvas.height = img.naturalHeight;
+        //         canvas.width = img.naturalWidth;
+        //         ctx.drawImage(img, 0, 0);
+        //         dataURL = canvas.toDataURL();
+        //         console.log('dataURL:',dataURL);
+        //         return dataURL;
+        //     `)
+        //     console.log('img response :', src)
+
+        //     let base64Data = src.replace(/^data:image\/\w+;base64,/, "")
+        //     let dataBuffer = new Buffer(base64Data, 'base64');
+        //     await fs.writeFileSync(imageFile, dataBuffer);
+        //     let txt = await processSync(path.join(__dirname, imageFile));
+        //     console.log(JSON.stringify(txt));
+        //     await driver.sleep(Math.random() * 500 + 500);
+        //     await driver.findElement(By.id('code')).clear();
+        //     await driver.findElement(By.id('code')).sendKeys(txt);
+        //     await driver.findElement(By.id('Button1')).click();
+        // } else {
+        // }
+        // return;
+
+        await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/portal/uiIndex.shtml'));
+        console.log('logged in');
+        await driver.executeScript(`
+            window.open = function(location) {
+                console.log('open:',location);
+                if (location.indexOf('uishowStatisticPage-initStatisticPage.shtml') == -1) {
+                    window.location = location;
+                }
+            }; 
+            window.alert = function(msg) {console.log('alert:',msg)}; 
+            window.confirm = function(msg) {console.log('confirm:',msg)};`);
+        await driver.executeScript("window.open('http://www.pss-system.gov.cn/sipopublicsearch/patentsearch/tableSearch-showTableSearchIndex.shtml')");
+
+        await getAll();
+
+        while (true) { }
+    } catch (err) {
+        console.error(err);
+    } finally {
+        // await driver.quit();
+    }
 
     async function removeOverlay() {
         await driver.executeScript(`
@@ -248,67 +312,5 @@ function replaceNbsps(str) {
             await dealRefList(index, year, page, i, ++refPage);
         }
 
-    }
-
-    try {
-        await driver.get('http://www.pss-system.gov.cn/sipopublicsearch/portal/uilogin-forwardLogin.shtml');
-        // await driver.findElement(By.id('j_username')).sendKeys('haoqiang_wu');
-        // await driver.findElement(By.id('j_username')).sendKeys('haozididi2018');
-        await driver.findElement(By.id('j_username')).sendKeys('han670786269');
-        await driver.findElement(By.id('j_password_show')).sendKeys('hanwei19930904');
-        // await driver.findElement(By.id('j_username')).sendKeys('hzz_cc');
-        // await driver.findElement(By.id('j_password_show')).sendKeys('huangclh520');
-
-        // await driver.wait(until.elementLocated(By.id('codePic')));
-
-        // let nocrawler = await driver.findElements(By.id('codePic'));
-        // if (nocrawler.length) {
-        //     let src = await driver.executeScript(`
-        //         var img = document.getElementById('codePic');
-        //         var canvas = document.createElement('CANVAS');
-        //         var ctx = canvas.getContext('2d');
-        //         var dataURL;
-        //         canvas.height = img.naturalHeight;
-        //         canvas.width = img.naturalWidth;
-        //         ctx.drawImage(img, 0, 0);
-        //         dataURL = canvas.toDataURL();
-        //         console.log('dataURL:',dataURL);
-        //         return dataURL;
-        //     `)
-        //     console.log('img response :', src)
-
-        //     let base64Data = src.replace(/^data:image\/\w+;base64,/, "")
-        //     let dataBuffer = new Buffer(base64Data, 'base64');
-        //     await fs.writeFileSync(imageFile, dataBuffer);
-        //     let txt = await processSync(path.join(__dirname, imageFile));
-        //     console.log(JSON.stringify(txt));
-        //     await driver.sleep(Math.random() * 500 + 500);
-        //     await driver.findElement(By.id('code')).clear();
-        //     await driver.findElement(By.id('code')).sendKeys(txt);
-        //     await driver.findElement(By.id('Button1')).click();
-        // } else {
-        // }
-        // return;
-
-        await driver.wait(until.urlIs('http://www.pss-system.gov.cn/sipopublicsearch/portal/uiIndex.shtml'));
-        console.log('logged in');
-        await driver.executeScript(`
-            window.open = function(location) {
-                console.log('open:',location);
-                if (location.indexOf('uishowStatisticPage-initStatisticPage.shtml') == -1) {
-                    window.location = location;
-                }
-            }; 
-            window.alert = function(msg) {console.log('alert:',msg)}; 
-            window.confirm = function(msg) {console.log('confirm:',msg)};`);
-        await driver.executeScript("window.open('http://www.pss-system.gov.cn/sipopublicsearch/patentsearch/tableSearch-showTableSearchIndex.shtml')");
-        
-        await getAll();
-
-        while (true) { }
-    }catch(err) {
-        console.error(err);
-    }finally {
-        // await driver.quit();
     }
 })();
