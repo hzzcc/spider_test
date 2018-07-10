@@ -11,7 +11,7 @@ let imageFile = './pic/get_random_image.png';
 const years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
 let current_index = 26;
 let current_year = 2;
-let current_page_index = 18;
+let current_page_index = 21;
 let isNotFirst = false;
 
 let oldConsole = console.log;
@@ -83,6 +83,7 @@ function replaceNbsps(str) {
                 current_index = 0;
             }
         }catch(err) {
+            isNotFirst = false;
             await getAll();
         }
     }
